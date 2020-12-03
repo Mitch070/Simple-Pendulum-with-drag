@@ -1,23 +1,46 @@
 import numpy as np
+from numpy import sin, cos
 from scipy.integrate import odeint
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 
 
-def pendulum(y, t):
-    theta, omega = y
-    dydt = (omega, -7 * theta)
-    return dydt
+# define the equations
+def equations(y0, t):
+    theta, x = y0
+    f = [x, -(g / l) * sin(theta)]
+    return f
 
 
-y0 = [np.pi / 4, 0]
-t = np.linspace(1, 10, 101)
+def plot_results(time, theta1, theta2):
+    plt.plot(time, theta1[:, 0])
+    plt.plot(time, theta2)
 
-sol = odeint(pendulum, y0, t)
-plt.plot(t, sol)
+    s = '(Initial Angle = ' + str(initial_angle) + ' degrees)'
+    plt.title('Pendulum Motion: ' + s)
+    plt.xlabel('time (s)')
+    plt.ylabel('angle (rad)')
+    plt.grid(True)
+    plt.legend(['nonlinear', 'linear'], loc='lower right')
+    plt.show()
 
-plt.plot(t, sol[:, 0], 'a', label='theta(t)')
-plt.plot(t, sol[:, 1], 'b', label='omega(t)')
-plt.legend(loc='best')
-plt.xlabel('t')
-plt.grid()
-plt.show()
+
+# parameters
+g = 9.81
+l = 1.0
+
+time = np.arange(0, 10.0, 0.025)
+
+# initial conditions
+initial_angle = 70.0
+theta0 = np.radians(initial_angle)
+x0 = np.radians(0.0)
+
+# find the solution to the nonlinear problem
+theta1 = odeint(equations, [theta0, x0], time)
+
+# find the solution to the linear problem
+w = np.sqrt(g / l)
+theta2 = [theta0 * cos(w * t) for t in time]
+
+# plot the results
+plot_results(time, theta1, theta2)
